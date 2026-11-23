@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026 Advent Calendar — for Ana</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Textura sutil de papel real -->
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <!-- Jardín botánico de fondo (tulipanes y flores floreciendo) -->
+  <div class="botanical-garden" aria-hidden="true">
+    <svg class="flora flora-bl" viewBox="0 0 260 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g class="sway-slow">
+        <path class="stem" d="M68 320 C66 250, 72 195, 84 128" stroke="#4f6b53" stroke-width="2.4" stroke-linecap="round"/>
+        <path class="leaf leaf-1" d="M68 295 C42 255, 28 215, 34 168 C52 204, 62 246, 70 286 Z" fill="#648066" fill-opacity="0.72" stroke="#455f49" stroke-width="1.2"/>
+        <path class="leaf leaf-2" d="M72 284 C98 248, 118 220, 126 178 C102 208, 86 242, 72 276 Z" fill="#59755c" fill-opacity="0.65" stroke="#455f49" stroke-width="1.2"/>
+        <g class="bloom-head bloom-1" style="transform-origin: 84px 128px;">
+          <path class="petal-left" d="M84 130 C64 118, 56 92, 68 68 C78 82, 83 102, 84 130 Z" fill="#c97b76" fill-opacity="0.82" stroke="#8f4a46" stroke-width="1.2"/>
+          <path class="petal-right" d="M84 130 C104 118, 112 92, 100 68 C90 82, 85 102, 84 130 Z" fill="#c97b76" fill-opacity="0.82" stroke="#8f4a46" stroke-width="1.2"/>
+          <path class="petal-center" d="M84 132 C68 112, 70 78, 84 58 C98 78, 100 112, 84 132 Z" fill="#d9948c" fill-opacity="0.88" stroke="#8f4a46" stroke-width="1.2"/>
+        </g>
+      </g>
+
+      <g class="sway-mid">
+        <path class="stem stem-2" d="M128 320 C134 268, 148 225, 166 176" stroke="#56725a" stroke-width="2" stroke-linecap="round"/>
+        <path class="leaf leaf-3" d="M135 288 C158 264, 178 244, 196 226 C172 238, 152 256, 134 278 Z" fill="#6b876d" fill-opacity="0.62" stroke="#455f49" stroke-width="1.1"/>
+        <g class="bloom-head bloom-2" style="transform-origin: 166px 176px;">
+          <path class="petal-left" d="M166 178 C150 164, 147 142, 160 124 C166 138, 168 156, 166 178 Z" fill="#deb09f" fill-opacity="0.82" stroke="#9b6656" stroke-width="1.1"/>
+          <path class="petal-right" d="M166 178 C184 170, 192 150, 184 130 C174 142, 170 158, 166 178 Z" fill="#deb09f" fill-opacity="0.82" stroke="#9b6656" stroke-width="1.1"/>
+          <path class="petal-center" d="M166 180 C156 160, 162 132, 175 118 C184 136, 180 162, 166 180 Z" fill="#ecc7b7" fill-opacity="0.9" stroke="#9b6656" stroke-width="1.1"/>
+        </g>
+      </g>
+
+      <g class="sway-fast">
+        <path class="stem stem-3" d="M24 320 C24 270, 16 230, 26 186" stroke="#5b755d" stroke-width="1.5" stroke-linecap="round"/>
+        <g class="bloom-head bloom-3" style="transform-origin: 26px 186px;">
+          <circle cx="26" cy="182" r="5.5" fill="#e6cab8" stroke="#99715d" stroke-width="1"/>
+          <circle cx="20" cy="186" r="4.5" fill="#f0dbcc" stroke="#99715d" stroke-width="1"/>
+          <circle cx="32" cy="186" r="4.5" fill="#f0dbcc" stroke="#99715d" stroke-width="1"/>
+          <circle cx="26" cy="186" r="2.3" fill="#c79753"/>
+        </g>
+        <g class="bloom-head bloom-4" style="transform-origin: 204px 258px;">
+          <path class="stem stem-3" d="M180 320 C188 292, 196 274, 206 254" stroke="#5b755d" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="206" cy="250" r="4.5" fill="#d9948c" fill-opacity="0.8" stroke="#8f4a46" stroke-width="0.9"/>
+          <circle cx="201" cy="254" r="4" fill="#e6b0a8" fill-opacity="0.85" stroke="#8f4a46" stroke-width="0.9"/>
+          <circle cx="211" cy="254" r="4" fill="#e6b0a8" fill-opacity="0.85" stroke="#8f4a46" stroke-width="0.9"/>
+          <circle cx="206" cy="254" r="2" fill="#c79753"/>
+        </g>
+      </g>
+    </svg>
+
+    <svg class="flora flora-br" viewBox="0 0 260 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g class="sway-slow">
+        <path class="stem" d="M192 320 C194 252, 186 196, 174 126" stroke="#4f6b53" stroke-width="2.4" stroke-linecap="round"/>
+        <path class="leaf leaf-1" d="M192 292 C218 256, 232 214, 224 166 C206 204, 198 244, 190 284 Z" fill="#648066" fill-opacity="0.7" stroke="#455f49" stroke-width="1.2"/>
+        <path class="leaf leaf-2" d="M188 282 C160 246, 140 218, 132 178 C156 208, 172 240, 188 274 Z" fill="#59755c" fill-opacity="0.62" stroke="#455f49" stroke-width="1.2"/>
+        <g class="bloom-head bloom-2" style="transform-origin: 174px 126px;">
+          <path class="petal-left" d="M174 128 C154 116, 146 90, 158 66 C168 80, 173 100, 174 128 Z" fill="#b75e60" fill-opacity="0.8" stroke="#7c3638" stroke-width="1.2"/>
+          <path class="petal-right" d="M174 128 C194 116, 202 90, 190 66 C180 80, 175 100, 174 128 Z" fill="#b75e60" fill-opacity="0.8" stroke="#7c3638" stroke-width="1.2"/>
+          <path class="petal-center" d="M174 130 C158 110, 160 76, 174 56 C188 76, 190 110, 174 130 Z" fill="#cb7776" fill-opacity="0.88" stroke="#7c3638" stroke-width="1.2"/>
+        </g>
+      </g>
+
+      <g class="sway-mid">
+        <path class="stem stem-2" d="M128 320 C122 270, 108 228, 92 182" stroke="#56725a" stroke-width="1.9" stroke-linecap="round"/>
+        <g class="bloom-head bloom-3" style="transform-origin: 92px 182px;">
+          <path class="petal-left" d="M92 184 C74 174, 68 154, 76 134 C86 146, 90 162, 92 184 Z" fill="#dfc28f" fill-opacity="0.82" stroke="#997a47" stroke-width="1.1"/>
+          <path class="petal-right" d="M92 184 C108 172, 112 150, 100 132 C94 146, 92 162, 92 184 Z" fill="#dfc28f" fill-opacity="0.82" stroke="#997a47" stroke-width="1.1"/>
+          <path class="petal-center" d="M92 186 C80 168, 78 140, 88 124 C100 138, 104 166, 92 186 Z" fill="#ecd5aa" fill-opacity="0.9" stroke="#997a47" stroke-width="1.1"/>
+        </g>
+      </g>
+
+      <g class="sway-fast">
+        <path class="stem stem-3" d="M232 320 C234 276, 238 242, 228 202" stroke="#5b755d" stroke-width="1.5" stroke-linecap="round"/>
+        <g class="bloom-head bloom-4" style="transform-origin: 228px 202px;">
+          <circle cx="228" cy="198" r="5" fill="#e8d0be" stroke="#98725b" stroke-width="1"/>
+          <circle cx="223" cy="202" r="4.2" fill="#f3e1d4" stroke="#98725b" stroke-width="1"/>
+          <circle cx="233" cy="202" r="4.2" fill="#f3e1d4" stroke="#98725b" stroke-width="1"/>
+          <circle cx="228" cy="202" r="2.2" fill="#c79753"/>
+        </g>
+      </g>
+    </svg>
+
+    <svg class="flora flora-tl" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g class="sway-slow">
+        <path class="stem" d="M-8 14 C36 22, 86 42, 134 78" stroke="#58735b" stroke-width="1.7" stroke-linecap="round"/>
+        <path class="leaf leaf-1" d="M44 26 C52 8, 72 6, 82 20 C68 26, 56 28, 44 26 Z" fill="#6b866d" fill-opacity="0.58" stroke="#48614b" stroke-width="1"/>
+        <path class="leaf leaf-2" d="M78 44 C72 62, 86 76, 102 70 C94 58, 86 50, 78 44 Z" fill="#648066" fill-opacity="0.55" stroke="#48614b" stroke-width="1"/>
+        <g class="bloom-head bloom-1" style="transform-origin: 134px 78px;">
+          <path d="M134 78 C144 66, 160 68, 166 80 C154 84, 144 82, 134 78 Z" fill="#d9948c" fill-opacity="0.78" stroke="#8f4a46" stroke-width="1"/>
+          <path d="M134 78 C140 92, 156 96, 166 86 C154 82, 144 80, 134 78 Z" fill="#e5b0a8" fill-opacity="0.82" stroke="#8f4a46" stroke-width="1"/>
+          <circle cx="136" cy="79" r="2.2" fill="#c79753"/>
+        </g>
+      </g>
+    </svg>
+
+    <svg class="flora flora-tr" viewBox="0 0 210 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g class="sway-mid">
+        <path class="stem" d="M218 16 C172 24, 124 44, 78 82" stroke="#58735b" stroke-width="1.7" stroke-linecap="round"/>
+        <path class="leaf leaf-1" d="M164 28 C156 10, 136 8, 126 22 C140 28, 152 30, 164 28 Z" fill="#6b866d" fill-opacity="0.58" stroke="#48614b" stroke-width="1"/>
+        <path class="leaf leaf-2" d="M128 46 C134 64, 120 78, 104 72 C112 60, 120 52, 128 46 Z" fill="#648066" fill-opacity="0.55" stroke="#48614b" stroke-width="1"/>
+        <g class="bloom-head bloom-2" style="transform-origin: 78px 82px;">
+          <circle cx="76" cy="78" r="5" fill="#e8cfa8" fill-opacity="0.82" stroke="#997a47" stroke-width="1"/>
+          <circle cx="71" cy="83" r="4.5" fill="#f1dec0" fill-opacity="0.88" stroke="#997a47" stroke-width="1"/>
+          <circle cx="81" cy="83" r="4.5" fill="#f1dec0" fill-opacity="0.88" stroke="#997a47" stroke-width="1"/>
+          <circle cx="76" cy="82" r="2.2" fill="#b75e60"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ==========================================
+       PANTALLA DE INICIO (PORTADA)
+  =========================================== -->
+  <section id="intro-screen" class="intro-screen">
+    <div class="cover-frame">
+      <div class="cover-corner top-left"></div>
+      <div class="cover-corner top-right"></div>
+      <div class="cover-corner bottom-left"></div>
+      <div class="cover-corner bottom-right"></div>
+
+      <div class="cover-emblem reveal-item" style="--d: 0.08s" aria-hidden="true">
+        <svg viewBox="0 0 44 44" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 39V22"/>
+          <path d="M22 34c-5-2-9-6-10-12 5 2 8 6 10 10"/>
+          <path d="M22 34c5-2 9-6 10-12-5 2-8 6-10 10"/>
+          <path d="M22 23c-5-2-8-7-7-14 4 2 6 5 7 9 1-4 3-7 7-9 1 7-2 12-7 14Z"/>
+          <path d="M22 23c-2-5-2-10 0-15 2 5 2 10 0 15Z"/>
+        </svg>
+      </div>
+
+      <h1 class="cover-title reveal-item" style="--d: 0.2s">
+        <span class="cover-year">2026</span>
+        Advent Calendar
+      </h1>
+
+      <p class="cover-subtitle reveal-item" style="--d: 0.34s">for Ana</p>
+
+      <div class="divider-line reveal-item" style="--d: 0.44s">
+        <span></span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M12 3C13.5 8.5 15.5 10.5 21 12C15.5 13.5 13.5 15.5 12 21C10.5 15.5 8.5 13.5 3 12C8.5 10.5 10.5 8.5 12 3Z"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <div class="reveal-item" style="--d: 0.56s">
+        <button id="btn-enter" class="wax-enter-btn" type="button">
+          <span class="wax-seal-circle" aria-hidden="true">
+            <span class="wax-ring"></span>
+            <span class="wax-monogram">A</span>
+          </span>
+          <span class="btn-label">Open the letters</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ícono oculto en el inicio: "secreto" -->
+    <button
+      id="secret-trigger"
+      class="secret-trigger"
+      type="button"
+      aria-label="Abrir secreto"
+      title="secreto"
+    >
+      <span class="secret-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="12" r="4"/>
+          <path d="M13 12h8"/>
+          <path d="M18 12v3"/>
+          <path d="M21 12v2"/>
+        </svg>
+      </span>
+      <span class="secret-word">secreto</span>
+    </button>
+  </section>
+
+  <!-- ==========================================
+       DESTELLO LUMINOSO + LIBRO SECRETO (21 DE NOVIEMBRE)
+  =========================================== -->
+  <div id="radiant-flash" class="radiant-flash" aria-hidden="true">
+    <div class="radiant-core"></div>
+    <div class="radiant-rays"></div>
+  </div>
+
+  <div id="secret-overlay" class="secret-overlay" aria-hidden="true">
+    <div id="secret-backdrop" class="secret-backdrop"></div>
+
+    <div class="secret-stage" role="dialog" aria-modal="true" aria-label="Libro secreto del 21 de noviembre">
+      <button id="btn-close-secret" class="close-secret-btn" type="button" aria-label="Cerrar libro">
+        ✕
+      </button>
+
+      <!-- Vista 1: Portada del libro café fuerte -->
+      <div id="book-closed-view" class="book-closed-view">
+        <button id="btn-open-book" class="closed-book-btn" type="button">
+          <span class="book-spine-edge" aria-hidden="true"></span>
+          <span class="book-pages-edge" aria-hidden="true"></span>
+          <span class="book-cover-front">
+            <span class="book-gold-frame">
+              <span class="book-corner tl"></span>
+              <span class="book-corner tr"></span>
+              <span class="book-corner bl"></span>
+              <span class="book-corner br"></span>
+
+              <span class="book-cover-ornament" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M24 41V22"/>
+                  <path d="M24 35c-6-2-10-7-11-13 5 2 9 6 11 11"/>
+                  <path d="M24 35c6-2 10-7 11-13-5 2-9 6-11 11"/>
+                  <path d="M24 23c-5-2-9-8-8-15 4 2 7 5 8 10 1-5 4-8 8-10 1 7-3 13-8 15Z"/>
+                </svg>
+              </span>
+
+              <span class="book-cover-date">21 de noviembre</span>
+              <span class="book-cover-rule"></span>
+              <span class="book-cover-hint">toca para abrir</span>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Vista 2: Libro semiabierto (solo página derecha visible) -->
+      <div id="book-open-view" class="book-open-view hidden">
+        <div class="half-open-book">
+          <div class="book-left-wall" aria-hidden="true">
+            <div class="wall-cover-leather"></div>
+            <div class="wall-paper-block"></div>
+            <div class="wall-gutter-shadow"></div>
+          </div>
+
+          <div class="book-right-shell">
+            <div class="page-stack-under" aria-hidden="true"></div>
+            <div class="page-stack-under second" aria-hidden="true"></div>
+
+            <div id="page-turn-leaf" class="page-turn-leaf" aria-hidden="true"></div>
+
+            <div id="book-right-page" class="book-right-page">
+              <div class="page-top-meta">
+                <span id="page-book-mark" class="page-book-mark">21 de noviembre</span>
+                <span id="page-number-label" class="page-number-label">Página 1 de 32</span>
+              </div>
+
+              <!-- Contenido dinámico de la página actual -->
+              <div id="book-page-content" class="book-page-content"></div>
+
+              <div class="page-nav">
+                <button id="btn-prev-page" class="page-nav-btn" type="button">
+                  ← Anterior
+                </button>
+
+                <label class="page-jump-wrap" aria-label="Ir a página">
+                  <select id="page-jump-select" class="page-jump-select"></select>
+                </label>
+
+                <button id="btn-next-page" class="page-nav-btn" type="button">
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CALENDARIO PRINCIPAL (DICIEMBRE)
+  =========================================== -->
+  <main id="main-app" class="main-app hidden">
+    <header class="app-header">
+      <p class="mini-header-tag">2026 Advent Calendar · for Ana</p>
+      <h2 class="header-title">Cartas de Diciembre</h2>
+
+      <div class="countdown-box">
+        <div class="countdown-notch left" aria-hidden="true"></div>
+        <div class="countdown-notch right" aria-hidden="true"></div>
+
+        <p id="countdown-label" class="countdown-label">Próxima carta disponible en</p>
+        <div class="countdown-grid">
+          <div class="time-unit">
+            <span id="cd-days">00</span>
+            <small>días</small>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-unit">
+            <span id="cd-hours">00</span>
+            <small>hrs</small>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-unit">
+            <span id="cd-mins">00</span>
+            <small>min</small>
+          </div>
+          <span class="time-sep">:</span>
+          <div class="time-unit">
+            <span id="cd-secs">00</span>
+            <small>seg</small>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="instructions-card" aria-label="Instrucciones">
+      <div class="tape-strip" aria-hidden="true"></div>
+      <div class="instructions-body">
+        <p class="instructions-text">
+          “No te contaré qué hay, pero en cada día...
+        </p>
+
+        <button
+          id="incognito-day-widget"
+          class="incognito-card-btn"
+          type="button"
+          title="Toca para girar"
+          aria-label="Día incógnito ilustrado"
+        >
+          <span class="incognito-card-inner">
+            <span id="incognito-tag" class="incognito-stamp-top">INCÓGNITO</span>
+            <span id="incognito-svg" class="incognito-illustration" aria-hidden="true"></span>
+            <span class="redacted-bars" aria-hidden="true">
+              <span></span>
+              <span></span>
+            </span>
+            <span class="incognito-day-label">DIC ??</span>
+          </span>
+        </button>
+
+        <p class="instructions-text">
+          ...hay una cosa que te puedo dar o decir, dependiendo del día.”
+        </p>
+      </div>
+
+      <p class="instructions-note">
+        <strong>Nota:</strong> cada cosa que incluyan los días será actualizada un día antes.
+      </p>
+    </section>
+
+    <section class="calendar-section">
+      <div id="calendar-grid" class="calendar-grid"></div>
+    </section>
+
+    <footer class="app-footer">
+      <span class="footer-rule"></span>
+      <p>Diciembre 2026 · Para Ana</p>
+      <span class="footer-rule"></span>
+    </footer>
+  </main>
+
+  <div id="toast-lock" class="toast-lock" role="status" aria-live="polite">
+    <span class="toast-dot" aria-hidden="true"></span>
+    <span id="toast-lock-text"></span>
+  </div>
+
+  <!-- Modal de carta abierta del calendario -->
+  <div id="letter-modal" class="letter-modal" aria-hidden="true">
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    <article class="letter-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="paper-fold-line" aria-hidden="true"></div>
+
+      <button id="btn-close-modal" class="close-modal-btn" type="button" aria-label="Cerrar carta">
+        ✕
+      </button>
+
+      <div class="letter-header-stamp">
+        <span id="modal-date" class="letter-date">01 DE DICIEMBRE, 2026</span>
+        <span id="modal-tag" class="letter-tag">CARTA</span>
+      </div>
+
+      <h3 id="modal-title" class="letter-title"></h3>
+
+      <div id="modal-body" class="letter-body"></div>
+
+      <div id="modal-extra" class="letter-extra"></div>
+
+      <div class="letter-footer-sign">
+        <span class="mini-wax-mark" aria-hidden="true">A</span>
+        <span class="letter-signoff">— Para Ana</span>
+      </div>
+    </article>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
