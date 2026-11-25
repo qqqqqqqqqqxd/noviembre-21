@@ -1,30 +1,51 @@
 /* =====================================================================
-   1. CONFIGURACIÓN DE PRUEBAS (DÉJALOS EN `null` AL SUBIR A GITHUB)
+   1. INTERRUPTOR DE PRUEBA (PARA PROBAR EN LIVE VIEW EN VS CODE)
+      - false = Modo real (respeta fechas y 6:00 PM hora de Nicaragua)
+      - true  = Desbloquea TODOS los raspa y gana y cartas para probarlos ahorita
+      IMPORTANTE: déjalo en `false` antes de mandárselo a Ana o subir a GitHub.
 ===================================================================== */
+const MODO_PRUEBA_TODO_ABIERTO = false;
 
 const ANIO = 2026;
 const TOTAL_DIAS = 31;
 
-/**
- * - DIA_SIMULADO: número 1-31 para probar sobres de diciembre.
- *   Ej: `const DIA_SIMULADO = 5;`
- * - FECHA_SIMULADA_LIBRO: fecha/hora exacta de Nicaragua para probar los raspa y gana.
- *   Ej: `const FECHA_SIMULADA_LIBRO = "2026-11-24T18:05:00-06:00";`
- *
- * IMPORTANTE: antes de mandársela a Ana, ambos deben quedar en `null`.
- */
-const DIA_SIMULADO = null;
-const FECHA_SIMULADA_LIBRO = null;
-
 /* =====================================================================
    2. RASPA Y GANA DEL LIBRO (24 DE NOVIEMBRE AL 21 DE DICIEMBRE)
-      Cada día se desbloquea automáticamente a las 6:00 PM hora Nicaragua (-06:00)
-      SOLO RELLENA `titulo`, `tipo` Y `mensaje` DEL DÍA QUE VAS A ACTUALIZAR
+      Se desbloquean automáticamente a las 6:00 PM hora Nicaragua (-06:00)
 ===================================================================== */
 const RASPA_Y_GANA = [
-  { fecha: "2026-11-24", etiqueta: "24 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
-  { fecha: "2026-11-25", etiqueta: "25 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
-  { fecha: "2026-11-26", etiqueta: "26 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
+  // DÍA 1 (24 nov): Ticket de vale "Sí a todo lo que digas"
+  {
+    fecha: "2026-11-24",
+    etiqueta: "24 de noviembre",
+    formato: "ticket",
+    kicker: "VALE OFICIAL · PARA ANA",
+    titulo: "Sí a todo lo que digas",
+    mensaje: "Válido para cumplir cualquier cosa que me pidas, sin peros ni excusas.",
+    pie: "Canjeable cuando tú quieras · Sin vencimiento",
+    talon: "VÁLIDO",
+    numero: "NO. 01"
+  },
+  // DÍA 2 (25 nov): 3 cuadros misteriosos con "?"
+  {
+    fecha: "2026-11-25",
+    etiqueta: "25 de noviembre",
+    formato: "cajas",
+    titulo: "Elige uno de los tres cuadros",
+    opciones: [
+      "Carta virtual",
+      "Elegir lo que quieras",
+      "Tu antojo favorito"
+    ]
+  },
+  // DÍA 3 (26 nov): Carta Virtual
+  {
+    fecha: "2026-11-26",
+    etiqueta: "26 de noviembre",
+    formato: "carta_virtual",
+    titulo: "Carta Virtual",
+    mensaje: "Una carta escrita especialmente para ti."
+  },
   { fecha: "2026-11-27", etiqueta: "27 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
   { fecha: "2026-11-28", etiqueta: "28 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
   { fecha: "2026-11-29", etiqueta: "29 de noviembre", titulo: "", tipo: "SORPRESA", mensaje: ``, extraTexto: "", extraLink: "" },
@@ -54,7 +75,6 @@ const RASPA_Y_GANA = [
 
 /* =====================================================================
    3. CARTAS DEL CALENDARIO DE DICIEMBRE (1 AL 31)
-      Se actualizan un día antes igual que antes
 ===================================================================== */
 const CARTAS = {
   1:  { titulo: "", tipo: "CARTA", mensaje: ``, extraTexto: "", extraLink: "" },
@@ -112,9 +132,10 @@ const LIBRO_PAGINA_4 =
    LÓGICA INTERNA (NO NECESITAS TOCAR DE AQUÍ PARA ABAJO)
 ===================================================================== */
 
-const TOTAL_PAGINAS_LIBRO = 4 + RASPA_Y_GANA.length; // 4 páginas + 28 raspa y gana = 32 páginas
-const STORAGE_KEY_CARTAS = "ana_adviento_2026_abiertas";
-const STORAGE_KEY_RASPA = "ana_libro_2026_raspados";
+const TOTAL_PAGINAS_LIBRO = 4 + RASPA_Y_GANA.length;
+const STORAGE_KEY_CARTAS = "ana_adviento_2026_abiertas_v2";
+const STORAGE_KEY_RASPA = "ana_libro_2026_raspados_v2";
+const STORAGE_KEY_CAJAS = "ana_libro_2026_cajas_v2";
 
 const INCOGNITO_MODOS = [
   {
@@ -217,6 +238,7 @@ let ultimoSegundo = null;
 let paginaActual = 1;
 let libroTimers = [];
 let scratchCountdownInterval = null;
+let memoriaPruebaCajas = {};
 
 function pad2(n) {
   return String(n).padStart(2, "0");
@@ -235,23 +257,17 @@ function mostrarToast(texto) {
    LIBRO SECRETO Y RASPA Y GANA (HORA NICARAGUA UTC-6)
 ===================================================================== */
 
-function obtenerAhoraLibro() {
-  if (FECHA_SIMULADA_LIBRO) {
-    return new Date(FECHA_SIMULADA_LIBRO);
-  }
-  return new Date();
-}
-
 function fechaDesbloqueoRaspa(fechaISO) {
-  // 6:00 PM hora exacta de Nicaragua (UTC-6 permanente, sin cambio de horario)
   return new Date(`${fechaISO}T18:00:00-06:00`);
 }
 
 function raspaEstaDesbloqueado(item) {
-  return obtenerAhoraLibro() >= fechaDesbloqueoRaspa(item.fecha);
+  if (MODO_PRUEBA_TODO_ABIERTO) return true;
+  return new Date() >= fechaDesbloqueoRaspa(item.fecha);
 }
 
 function obtenerRaspados() {
+  if (MODO_PRUEBA_TODO_ABIERTO) return [];
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY_RASPA) || "[]");
   } catch {
@@ -260,15 +276,42 @@ function obtenerRaspados() {
 }
 
 function marcarComoRaspado(fechaISO) {
+  if (MODO_PRUEBA_TODO_ABIERTO) return;
   const lista = obtenerRaspados();
   if (!lista.includes(fechaISO)) {
     lista.push(fechaISO);
     try {
       localStorage.setItem(STORAGE_KEY_RASPA, JSON.stringify(lista));
-    } catch {
-      // Ignora si el navegador bloquea storage
-    }
+    } catch {}
   }
+}
+
+function obtenerEstadoCajas() {
+  if (MODO_PRUEBA_TODO_ABIERTO) return memoriaPruebaCajas;
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_CAJAS) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function guardarEstadoCajas(estado) {
+  if (MODO_PRUEBA_TODO_ABIERTO) {
+    memoriaPruebaCajas = estado;
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY_CAJAS, JSON.stringify(estado));
+  } catch {}
+}
+
+function mezclarArray(arr) {
+  const copia = [...arr];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
 }
 
 function limpiarTimersLibro() {
@@ -394,20 +437,20 @@ function formatearCuentaRegresivaExacta(ms) {
   return `${pad2(horas)}h ${pad2(mins)}m ${pad2(segs)}s`;
 }
 
-/* Inicializa la lámina metálica raspable sobre el canvas */
+/* Inicializa la lámina dorada raspable */
 function inicializarCanvasRaspa(canvas, item, helperEl) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const stage = canvas.parentElement;
+  if (!ctx || !stage) return;
 
-  const w = Math.max(stage.clientWidth, 260);
-  const h = Math.max(stage.clientHeight, 196);
+  const w = Math.max(stage.offsetWidth, 260);
+  const h = Math.max(stage.offsetHeight, 212);
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   canvas.width = Math.floor(w * dpr);
   canvas.height = Math.floor(h * dpr);
   ctx.scale(dpr, dpr);
 
-  // Fondo metálico dorado antiguo
   const grad = ctx.createLinearGradient(0, 0, w, h);
   grad.addColorStop(0, "#c8a96e");
   grad.addColorStop(0.35, "#e0c793");
@@ -416,7 +459,6 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
 
-  // Líneas diagonales muy sutiles de textura metálica
   ctx.strokeStyle = "rgba(255, 248, 232, 0.22)";
   ctx.lineWidth = 1;
   for (let x = -h; x < w + h; x += 14) {
@@ -426,13 +468,11 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
     ctx.stroke();
   }
 
-  // Marco interior punteado
   ctx.strokeStyle = "rgba(65, 36, 24, 0.34)";
   ctx.setLineDash([4, 4]);
   ctx.strokeRect(10, 10, w - 20, h - 20);
   ctx.setLineDash([]);
 
-  // Texto grabado sobre la lámina
   ctx.fillStyle = "rgba(56, 32, 20, 0.85)";
   ctx.font = '500 13px "IBM Plex Mono", monospace';
   ctx.textAlign = "center";
@@ -443,11 +483,10 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
   ctx.font = 'italic 18px "Cormorant Garamond", Georgia, serif';
   ctx.fillText(item.etiqueta, w / 2, h / 2 + 16);
 
-  // Modo borrado para raspar
   ctx.globalCompositeOperation = "destination-out";
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.lineWidth = 36;
+  ctx.lineWidth = 38;
 
   let raspando = false;
   let ultimoPunto = null;
@@ -465,7 +504,7 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
   function rasparHasta(pt) {
     if (!ultimoPunto) {
       ctx.beginPath();
-      ctx.arc(pt.x, pt.y, 18, 0, Math.PI * 2);
+      ctx.arc(pt.x, pt.y, 19, 0, Math.PI * 2);
       ctx.fill();
     } else {
       ctx.beginPath();
@@ -485,12 +524,15 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
       total++;
       if (data[i] < 40) borrados++;
     }
-    if (total > 0 && borrados / total >= 0.45) {
+    if (total > 0 && borrados / total >= 0.36) {
       yaRevelado = true;
       canvas.classList.add("is-cleared");
       marcarComoRaspado(item.fecha);
       if (helperEl) {
-        helperEl.textContent = "Descubierto · guardado en tu libro";
+        helperEl.textContent =
+          item.formato === "cajas"
+            ? "Ahora toca uno de los tres cuadros"
+            : "Descubierto · guardado en tu libro";
       }
     }
   }
@@ -498,7 +540,7 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
   canvas.addEventListener("pointerdown", (e) => {
     if (yaRevelado) return;
     raspando = true;
-    canvas.setPointerCapture(e.pointerId);
+    try { canvas.setPointerCapture(e.pointerId); } catch {}
     ultimoPunto = null;
     rasparHasta(puntoEnCanvas(e));
   });
@@ -519,6 +561,149 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
 
   canvas.addEventListener("pointerup", terminarRaspa);
   canvas.addEventListener("pointercancel", terminarRaspa);
+}
+
+/* Construye el premio debajo de la lámina raspable */
+function construirContenidoRaspa(item, helperEl) {
+  const underneath = document.createElement("div");
+  underneath.className = "scratch-underneath";
+
+  // FORMATO 1: TICKET DE VALE (Día 1)
+  if (item.formato === "ticket") {
+    const ticket = document.createElement("div");
+    ticket.className = "vale-ticket";
+    ticket.innerHTML = `
+      <div class="vale-main">
+        <span class="vale-kicker">${item.kicker || "VALE OFICIAL"}</span>
+        <h5 class="vale-title">${item.titulo || "Vale especial"}</h5>
+        ${item.mensaje ? `<p class="vale-desc">${item.mensaje}</p>` : ""}
+        <span class="vale-footer-line">${item.pie || "Para Ana · Canjeable cuando quieras"}</span>
+      </div>
+      <div class="vale-stub">
+        <span class="vale-stub-word">${item.talon || "VÁLIDO"}</span>
+        <span class="vale-stub-num">${item.numero || "NO. 01"}</span>
+      </div>
+    `;
+    underneath.appendChild(ticket);
+    return underneath;
+  }
+
+  // FORMATO 2: 3 CUADROS MISTERIOSOS CON "?" (Día 2)
+  if (item.formato === "cajas") {
+    const estadoGlobal = obtenerEstadoCajas();
+    if (!estadoGlobal[item.fecha] || !Array.isArray(estadoGlobal[item.fecha].orden)) {
+      estadoGlobal[item.fecha] = {
+        orden: mezclarArray(item.opciones || ["Carta virtual", "Elegir lo que quieras", "Tu antojo favorito"]),
+        elegida: null
+      };
+      guardarEstadoCajas(estadoGlobal);
+    }
+
+    const estadoDia = estadoGlobal[item.fecha];
+    const wrap = document.createElement("div");
+    wrap.className = "mystery-wrap";
+
+    const prompt = document.createElement("p");
+    prompt.className = "mystery-prompt";
+    prompt.textContent =
+      estadoDia.elegida === null
+        ? (item.titulo || "Elige uno de los tres cuadros")
+        : "Esta fue tu elección:";
+
+    const grid = document.createElement("div");
+    grid.className = "mystery-grid";
+
+    const resultPill = document.createElement("p");
+    resultPill.className = "mystery-result-pill";
+
+    function pintarCajas() {
+      grid.innerHTML = "";
+      const elegida = estadoDia.elegida;
+
+      estadoDia.orden.forEach((recompensa, idx) => {
+        const box = document.createElement("button");
+        box.type = "button";
+        box.className = "mystery-box";
+
+        if (elegida === null) {
+          box.innerHTML = `<span class="mystery-q">?</span>`;
+          box.addEventListener("click", () => {
+            estadoDia.elegida = idx;
+            estadoGlobal[item.fecha] = estadoDia;
+            guardarEstadoCajas(estadoGlobal);
+            prompt.textContent = "Esta fue tu elección:";
+            pintarCajas();
+            if (helperEl) helperEl.textContent = "Recompensa guardada en tu libro";
+          });
+        } else {
+          box.disabled = true;
+          if (idx === elegida) {
+            box.classList.add("is-chosen");
+            box.innerHTML = `<span class="mystery-reward-label">${recompensa}</span>`;
+          } else {
+            box.classList.add("is-other");
+            box.innerHTML = `<span class="mystery-reward-label">${recompensa}</span>`;
+          }
+        }
+
+        grid.appendChild(box);
+      });
+
+      resultPill.textContent =
+        elegida !== null ? `Ganaste: ${estadoDia.orden[elegida]}` : "Solo puedes abrir uno";
+    }
+
+    pintarCajas();
+    wrap.appendChild(prompt);
+    wrap.appendChild(grid);
+    wrap.appendChild(resultPill);
+    underneath.appendChild(wrap);
+    return underneath;
+  }
+
+  // FORMATO 3: CARTA VIRTUAL (Día 3)
+  if (item.formato === "carta_virtual") {
+    const card = document.createElement("div");
+    card.className = "virtual-letter-badge";
+    card.innerHTML = `
+      <span class="virtual-letter-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="1.5"/>
+          <path d="M4 6l8 6 8-6"/>
+        </svg>
+      </span>
+      <h5 class="virtual-letter-title">${item.titulo || "Carta Virtual"}</h5>
+      ${item.mensaje ? `<p class="virtual-letter-sub">${item.mensaje}</p>` : ""}
+    `;
+    underneath.appendChild(card);
+    return underneath;
+  }
+
+  // FORMATO NORMAL (Días 4 al 28)
+  const tieneContenido =
+    (item.titulo && item.titulo.trim()) || (item.mensaje && item.mensaje.trim());
+
+  underneath.innerHTML = `
+    <span class="scratch-prize-tag">${(item.tipo || "SORPRESA").toUpperCase()}</span>
+    <h5 class="scratch-prize-title">${tieneContenido ? (item.titulo || item.etiqueta) : `Sorpresa del ${item.etiqueta}`}</h5>
+    <p class="scratch-prize-text">${
+      tieneContenido
+        ? item.mensaje
+        : "Este raspa y gana acaba de abrirse, pero su sorpresa se está terminando de escribir. Vuelve en un ratito."
+    }</p>
+  `;
+
+  if (item.extraLink && item.extraLink.trim()) {
+    const link = document.createElement("a");
+    link.className = "scratch-prize-link";
+    link.href = item.extraLink;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = item.extraTexto || "Ver sorpresa";
+    underneath.appendChild(link);
+  }
+
+  return underneath;
 }
 
 /* Renderiza una página de Raspa y Gana (Páginas 5 a 32) */
@@ -582,7 +767,7 @@ function renderPaginaRaspa(indiceRaspa) {
 
     const cdLive = lockedPanel.querySelector("#scratch-cd-live");
     const actualizarCuentaRaspa = () => {
-      const restante = fechaDesbloqueoRaspa(item.fecha) - obtenerAhoraLibro();
+      const restante = fechaDesbloqueoRaspa(item.fecha) - new Date();
       if (restante <= 0) {
         poblarIndiceLibro();
         renderPaginaLibro(paginaActual);
@@ -596,39 +781,19 @@ function renderPaginaRaspa(indiceRaspa) {
     return;
   }
 
-  // DESBLOQUEADO: mostrar raspa y gana interactivo
+  // DESBLOQUEADO
   const stage = document.createElement("div");
   stage.className = "scratch-stage";
 
-  const tieneContenido =
-    (item.titulo && item.titulo.trim()) || (item.mensaje && item.mensaje.trim());
-
-  const underneath = document.createElement("div");
-  underneath.className = "scratch-underneath";
-  underneath.innerHTML = `
-    <span class="scratch-prize-tag">${(item.tipo || "SORPRESA").toUpperCase()}</span>
-    <h5 class="scratch-prize-title">${tieneContenido ? (item.titulo || item.etiqueta) : `Sorpresa del ${item.etiqueta}`}</h5>
-    <p class="scratch-prize-text">${
-      tieneContenido
-        ? item.mensaje
-        : "Este raspa y gana acaba de abrirse, pero su sorpresa se está terminando de escribir. Vuelve en un ratito."
-    }</p>
-  `;
-
-  if (item.extraLink && item.extraLink.trim()) {
-    const link = document.createElement("a");
-    link.className = "scratch-prize-link";
-    link.href = item.extraLink;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = item.extraTexto || "Ver sorpresa";
-    underneath.appendChild(link);
-  }
-
+  const underneath = construirContenidoRaspa(item, helper);
   stage.appendChild(underneath);
+  ticketFrame.appendChild(stage);
 
   if (yaRaspado) {
-    helper.textContent = "Ya raspaste este día";
+    helper.textContent =
+      item.formato === "cajas" && obtenerEstadoCajas()[item.fecha]?.elegida === null
+        ? "Toca uno de los tres cuadros"
+        : "Ya raspaste este día";
   } else {
     const canvas = document.createElement("canvas");
     canvas.className = "scratch-canvas";
@@ -640,8 +805,6 @@ function renderPaginaRaspa(indiceRaspa) {
       inicializarCanvasRaspa(canvas, item, helper);
     });
   }
-
-  ticketFrame.appendChild(stage);
 }
 
 /* Renderiza cualquier página del libro (1 a 32) */
@@ -764,22 +927,17 @@ function cerrarSecreto() {
    LÓGICA DEL CALENDARIO DE ADVIENTO (DICIEMBRE)
 ===================================================================== */
 
-function obtenerAhoraCalendario() {
-  if (DIA_SIMULADO !== null) {
-    return new Date(`${ANIO}-12-${pad2(DIA_SIMULADO)}T12:00:00-06:00`);
-  }
-  return new Date();
-}
-
 function fechaDesbloqueoCarta(dia) {
   return new Date(`${ANIO}-12-${pad2(dia)}T00:00:00-06:00`);
 }
 
 function cartaEstaDesbloqueada(dia) {
-  return obtenerAhoraCalendario() >= fechaDesbloqueoCarta(dia);
+  if (MODO_PRUEBA_TODO_ABIERTO) return true;
+  return new Date() >= fechaDesbloqueoCarta(dia);
 }
 
 function obtenerAbiertas() {
+  if (MODO_PRUEBA_TODO_ABIERTO) return [];
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY_CARTAS) || "[]");
   } catch {
@@ -788,14 +946,13 @@ function obtenerAbiertas() {
 }
 
 function marcarComoAbierta(dia) {
+  if (MODO_PRUEBA_TODO_ABIERTO) return;
   const abiertas = obtenerAbiertas();
   if (!abiertas.includes(dia)) {
     abiertas.push(dia);
     try {
       localStorage.setItem(STORAGE_KEY_CARTAS, JSON.stringify(abiertas));
-    } catch {
-      // Ignora si el navegador bloquea storage
-    }
+    } catch {}
   }
 }
 
@@ -882,7 +1039,7 @@ function renderCalendario(animarReparto = false) {
         card.classList.remove("is-shaking");
         void card.offsetWidth;
         card.classList.add("is-shaking");
-        const restante = fechaDesbloqueoCarta(dia) - obtenerAhoraCalendario();
+        const restante = fechaDesbloqueoCarta(dia) - new Date();
         mostrarToast(`Aún sellada · El ${dia} de diciembre se abre en ${formatearTiempoRestante(restante)}.`);
         return;
       }
@@ -940,7 +1097,7 @@ function cerrarModal() {
 }
 
 function actualizarContador() {
-  const ahora = obtenerAhoraCalendario();
+  const ahora = new Date();
   let proximoDia = null;
 
   for (let d = 1; d <= TOTAL_DIAS; d++) {

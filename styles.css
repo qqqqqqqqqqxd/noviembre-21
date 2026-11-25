@@ -52,7 +52,7 @@ body {
 }
 
 /* ==========================================
-   JARDÍN BOTÁNICO DE FONDO (TULIPANES Y FLORES)
+   JARDÍN BOTÁNICO DE FONDO
 ========================================== */
 .botanical-garden {
   position: fixed;
@@ -646,8 +646,8 @@ body {
   position: relative;
   display: flex;
   align-items: stretch;
-  width: min(595px, 95vw);
-  min-height: min(570px, 83vh);
+  width: min(605px, 95vw);
+  min-height: min(575px, 83vh);
   filter: drop-shadow(0 30px 55px rgba(0, 0, 0, 0.55));
 }
 
@@ -746,10 +746,10 @@ body {
   position: relative;
   z-index: 6;
   height: 100%;
-  min-height: min(550px, 79vh);
+  min-height: min(555px, 79vh);
   display: flex;
   flex-direction: column;
-  padding: 26px 30px 20px 34px;
+  padding: 26px 28px 20px 32px;
   border-radius: 0 6px 6px 0;
   background:
     linear-gradient(90deg, rgba(43, 24, 16, 0.14) 0%, rgba(43, 24, 16, 0.03) 7%, transparent 16%),
@@ -820,10 +820,7 @@ body {
   transform: translateY(8px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.book-teaser-hint.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.book-teaser-hint.is-visible { opacity: 1; transform: translateY(0); }
 
 .type-cursor {
   display: inline-block;
@@ -945,7 +942,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 13px;
   text-align: center;
   animation: fadeSlidePage 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -965,7 +962,7 @@ body {
 
 .scratch-date-heading {
   font-family: var(--font-serif);
-  font-size: clamp(1.6rem, 3.6vw, 2.05rem);
+  font-size: clamp(1.55rem, 3.6vw, 2rem);
   font-weight: 500;
   color: var(--coffee-rich);
   line-height: 1.15;
@@ -974,8 +971,8 @@ body {
 .scratch-ticket-frame {
   position: relative;
   width: 100%;
-  max-width: 390px;
-  min-height: 215px;
+  max-width: 420px;
+  min-height: 224px;
   padding: 12px;
   background: #f5ecdc;
   border: 1px dashed rgba(65, 36, 24, 0.32);
@@ -984,7 +981,6 @@ body {
     inset 0 0 0 4px rgba(255, 252, 245, 0.7);
 }
 
-/* Pedacito de cinta pegando el raspa y gana a la hoja */
 .scratch-ticket-frame::before {
   content: "";
   position: absolute;
@@ -999,10 +995,9 @@ body {
   pointer-events: none;
 }
 
-/* Estado BLOQUEADO del raspa y gana */
 .scratch-locked-panel {
   width: 100%;
-  min-height: 190px;
+  min-height: 198px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1023,10 +1018,7 @@ body {
   cursor: not-allowed;
   user-select: none;
 }
-
-.scratch-locked-panel.is-shaking {
-  animation: lockedShake 0.42s ease;
-}
+.scratch-locked-panel.is-shaking { animation: lockedShake 0.42s ease; }
 
 .scratch-lock-icon {
   width: 38px;
@@ -1056,19 +1048,10 @@ body {
   background: rgba(15, 8, 5, 0.32);
 }
 
-.scratch-lock-sub {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
-  color: rgba(242, 228, 204, 0.72);
-  text-transform: uppercase;
-}
-
-/* Estado DESBLOQUEADO (Canvas interactivo de raspar) */
 .scratch-stage {
   position: relative;
   width: 100%;
-  min-height: 196px;
+  min-height: 212px;
   background: linear-gradient(180deg, #fffdf8 0%, #f8f1e2 100%);
   border: 1px solid rgba(169, 134, 76, 0.42);
   overflow: hidden;
@@ -1081,7 +1064,7 @@ body {
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: 22px 20px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1128,10 +1111,7 @@ body {
   letter-spacing: 0.08em;
   transition: background 0.2s ease, color 0.2s ease;
 }
-.scratch-prize-link:hover {
-  background: var(--coffee-rich);
-  color: #f9f1e2;
-}
+.scratch-prize-link:hover { background: var(--coffee-rich); color: #f9f1e2; }
 
 .scratch-canvas {
   position: absolute;
@@ -1141,18 +1121,272 @@ body {
   z-index: 3;
   cursor: crosshair;
   touch-action: none;
-  transition: opacity 0.65s ease;
+  transition: opacity 0.6s ease;
 }
-
-.scratch-canvas.is-cleared {
-  opacity: 0;
-  pointer-events: none;
-}
+.scratch-canvas.is-cleared { opacity: 0; pointer-events: none; }
 
 .scratch-helper-note {
   font-family: var(--font-hand);
   font-size: 1.26rem;
   color: var(--ink-muted);
+}
+
+/* ==========================================
+   FORMATOS ESPECIALES DE RASPA Y GANA
+========================================== */
+
+/* DÍA 1: Ticket vintage de Vale ("Sí a todo") */
+.vale-ticket {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  background: linear-gradient(155deg, #fbf4e4 0%, #f3e6cc 100%);
+  border: 1.5px solid var(--wax);
+  box-shadow: 0 6px 16px rgba(91, 21, 25, 0.14);
+  overflow: hidden;
+  text-align: left;
+}
+
+.vale-ticket::before,
+.vale-ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #faf4e7;
+  border: 1.5px solid var(--wax);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.vale-ticket::before { left: -9px; }
+.vale-ticket::after  { right: -9px; }
+
+.vale-main {
+  flex: 1;
+  padding: 15px 14px 15px 20px;
+  border-right: 1.5px dashed rgba(140, 38, 43, 0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.vale-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wax);
+}
+
+.vale-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 3vw, 1.58rem);
+  font-weight: 600;
+  color: var(--coffee-deep);
+  line-height: 1.14;
+}
+
+.vale-desc {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink-muted);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.vale-footer-line {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(140, 38, 43, 0.18);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--coffee-mid);
+}
+
+.vale-stub {
+  width: 66px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--wax) 0%, var(--wax-dark) 100%);
+  color: #f9ecda;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 8px 10px 6px;
+  text-align: center;
+}
+
+.vale-stub-word {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-transform: uppercase;
+}
+
+.vale-stub-num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  opacity: 0.8;
+}
+
+/* DÍA 2: 3 cuadros misteriosos con "?" */
+.mystery-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 11px;
+}
+
+.mystery-prompt {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.12rem;
+  color: var(--coffee-rich);
+}
+
+.mystery-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mystery-box {
+  position: relative;
+  min-height: 98px;
+  padding: 10px 7px;
+  border: 1.5px solid rgba(169, 134, 76, 0.72);
+  background: linear-gradient(155deg, #3c2216 0%, #26140c 100%);
+  color: #f3dfb8;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 5px 12px rgba(43, 24, 16, 0.16);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.28s ease,
+              background 0.35s ease,
+              border-color 0.35s ease,
+              opacity 0.35s ease;
+}
+
+.mystery-box::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(232, 204, 152, 0.35);
+  pointer-events: none;
+}
+
+.mystery-box:hover:not(:disabled) {
+  transform: translateY(-4px);
+  border-color: #e6c688;
+  box-shadow: 0 10px 18px rgba(43, 24, 16, 0.24);
+}
+
+.mystery-q {
+  font-family: var(--font-serif);
+  font-size: 2.3rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #f1d49c;
+}
+
+.mystery-reward-label {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.18;
+  text-align: center;
+}
+
+.mystery-box.is-chosen {
+  background: linear-gradient(160deg, #fffdf8 0%, #f5e9d0 100%);
+  border-color: var(--wax);
+  color: var(--pine);
+  transform: scale(1.04);
+  box-shadow: 0 0 0 3px rgba(140, 38, 43, 0.16), 0 8px 18px rgba(43, 24, 16, 0.16);
+  cursor: default;
+  animation: boxRevealPop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mystery-box.is-chosen::before { border-color: rgba(140, 38, 43, 0.32); }
+
+.mystery-box.is-other {
+  background: #ede4d3;
+  border-color: rgba(65, 36, 24, 0.2);
+  color: var(--ink-muted);
+  opacity: 0.56;
+  cursor: default;
+  box-shadow: none;
+}
+
+.mystery-box.is-other::before { border-color: rgba(65, 36, 24, 0.14); }
+
+@keyframes boxRevealPop {
+  0%   { transform: scale(0.88) rotateY(70deg); }
+  65%  { transform: scale(1.07) rotateY(0deg); }
+  100% { transform: scale(1.04) rotateY(0deg); }
+}
+
+.mystery-result-pill {
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  color: var(--wax);
+  min-height: 1.4em;
+}
+
+/* DÍA 3: Tarjeta de Carta Virtual */
+.virtual-letter-badge {
+  width: 100%;
+  padding: 18px 18px 16px;
+  background: linear-gradient(175deg, #fffdf9 0%, #f6eedf 100%);
+  border: 1px solid rgba(33, 55, 44, 0.28);
+  outline: 4px solid rgba(255, 253, 248, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.virtual-letter-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--wax-light) 0%, var(--wax) 65%, var(--wax-dark) 100%);
+  color: #f9ecda;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px rgba(91, 21, 25, 0.28);
+}
+
+.virtual-letter-title {
+  font-family: var(--font-serif);
+  font-size: 1.72rem;
+  font-weight: 600;
+  color: var(--pine);
+  line-height: 1.15;
+}
+
+.virtual-letter-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.06rem;
+  color: var(--ink-muted);
+  white-space: pre-line;
 }
 
 /* Navegación de páginas del libro */
@@ -1181,12 +1415,7 @@ body {
 .page-nav-btn:hover:not(:disabled) { background: var(--coffee-rich); color: #f9f1e2; }
 .page-nav-btn:disabled { opacity: 0.32; cursor: default; }
 
-.page-jump-wrap {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-}
-
+.page-jump-wrap { display: inline-flex; align-items: center; min-width: 0; }
 .page-jump-select {
   max-width: 165px;
   padding: 5px 8px;
@@ -1710,6 +1939,10 @@ body {
   .book-right-page { padding: 20px 16px 16px 18px; }
   .page-nav-btn { padding: 5px 10px; font-size: 0.66rem; }
   .page-jump-select { max-width: 125px; font-size: 0.64rem; }
+  .vale-stub { width: 52px; }
+  .mystery-grid { gap: 7px; }
+  .mystery-box { min-height: 88px; padding: 8px 5px; }
+  .mystery-reward-label { font-size: 0.8rem; }
   .calendar-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 14px; }
   .envelope-card { height: 148px; }
   .instructions-card { padding: 28px 18px 22px; }
