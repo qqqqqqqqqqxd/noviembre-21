@@ -1,20 +1,44 @@
 /* =====================================================================
-   1. INTERRUPTOR DE PRUEBA (PARA PROBAR EN LIVE VIEW EN VS CODE)
-      - false = Modo real (respeta fechas y 6:00 PM hora de Nicaragua)
-      - true  = Desbloquea TODOS los raspa y gana y cartas para probarlos ahorita
-      IMPORTANTE: déjalo en `false` antes de mandárselo a Ana o subir a GitHub.
+   1. INTERRUPTORES DE PRUEBA
+      - MODO_PRUEBA_TODO_ABIERTO: `true` solo si quieres probar los raspa
+        y sobres antes de tiempo.
+      - PREVIEW_RULETA: `true` para ver/quitar la preview de la ruleta hoy.
+      IMPORTANTE: pon AMBOS en `false` antes de subir a GitHub para Ana.
 ===================================================================== */
 const MODO_PRUEBA_TODO_ABIERTO = false;
+const PREVIEW_RULETA = false;
 
 const ANIO = 2026;
 const TOTAL_DIAS = 31;
 
 /* =====================================================================
-   2. RASPA Y GANA DEL LIBRO (24 DE NOVIEMBRE AL 21 DE DICIEMBRE)
+   2. CONFIGURACIÓN DE LA RULETA SORPRESA
+      Spawnea hoy 26 de noviembre a las 4:40 PM (Nicaragua) y dura 1 hora
+      (hasta las 5:40 PM).
+      `peso` = probabilidad aproximada en % por giro:
+      - Dorados: 3.5% cada uno (difíciles pero posibles en 10 intentos)
+      - Normales: 15.5% cada uno
+===================================================================== */
+const RULETA_INICIO = new Date("2026-11-26T16:40:00-06:00");
+const RULETA_FIN    = new Date("2026-11-26T17:40:00-06:00");
+const RULETA_MAX_INTENTOS = 10;
+
+const RULETA_PREMIOS = [
+  { corto: "21 de dic ✦",     completo: "Saber qué pasará el 21 de diciembre", dorado: true,  peso: 3.5  },
+  { corto: "Cartas",          completo: "Cartas",                              dorado: false, peso: 15.5 },
+  { corto: "300 besototes",   completo: "300 besototes",                       dorado: false, peso: 15.5 },
+  { corto: "Tu antojo fav",   completo: "Tu antojo fav",                       dorado: false, peso: 15.5 },
+  { corto: "1ro de dic ✦",    completo: "Revelación del 1ro de diciembre",     dorado: true,  peso: 3.5  },
+  { corto: "Regalo sorpresa", completo: "Regalo sorpresa",                     dorado: false, peso: 15.5 },
+  { corto: "Cita sorpresa",   completo: "Una cita sorpresa planeada por mí",   dorado: false, peso: 15.5 },
+  { corto: "Ida al cine",     completo: "Una ida al cine juntos",              dorado: false, peso: 15.5 }
+];
+
+/* =====================================================================
+   3. RASPA Y GANA DEL LIBRO (24 DE NOVIEMBRE AL 21 DE DICIEMBRE)
       Se desbloquean automáticamente a las 6:00 PM hora Nicaragua (-06:00)
 ===================================================================== */
 const RASPA_Y_GANA = [
-  // DÍA 1 (24 nov): Ticket de vale "Sí a todo lo que digas"
   {
     fecha: "2026-11-24",
     etiqueta: "24 de noviembre",
@@ -26,7 +50,6 @@ const RASPA_Y_GANA = [
     talon: "VÁLIDO",
     numero: "NO. 01"
   },
-  // DÍA 2 (25 nov): 3 cuadros misteriosos con "?"
   {
     fecha: "2026-11-25",
     etiqueta: "25 de noviembre",
@@ -38,7 +61,6 @@ const RASPA_Y_GANA = [
       "Tu antojo favorito"
     ]
   },
-  // DÍA 3 (26 nov): Carta Virtual
   {
     fecha: "2026-11-26",
     etiqueta: "26 de noviembre",
@@ -74,7 +96,7 @@ const RASPA_Y_GANA = [
 ];
 
 /* =====================================================================
-   3. CARTAS DEL CALENDARIO DE DICIEMBRE (1 AL 31)
+   4. CARTAS DEL CALENDARIO DE DICIEMBRE (1 AL 31)
 ===================================================================== */
 const CARTAS = {
   1:  { titulo: "", tipo: "CARTA", mensaje: ``, extraTexto: "", extraLink: "" },
@@ -133,9 +155,10 @@ const LIBRO_PAGINA_4 =
 ===================================================================== */
 
 const TOTAL_PAGINAS_LIBRO = 4 + RASPA_Y_GANA.length;
-const STORAGE_KEY_CARTAS = "ana_adviento_2026_abiertas_v2";
-const STORAGE_KEY_RASPA = "ana_libro_2026_raspados_v2";
-const STORAGE_KEY_CAJAS = "ana_libro_2026_cajas_v2";
+const STORAGE_KEY_CARTAS  = "ana_adviento_2026_abiertas_v2";
+const STORAGE_KEY_RASPA   = "ana_libro_2026_raspados_v2";
+const STORAGE_KEY_CAJAS   = "ana_libro_2026_cajas_v2";
+const STORAGE_KEY_RULETA  = "ana_ruleta_2026_nov26_v2";
 
 const INCOGNITO_MODOS = [
   {
@@ -229,6 +252,33 @@ const btnPrevPage = document.getElementById("btn-prev-page");
 const btnNextPage = document.getElementById("btn-next-page");
 const pageJumpSelect = document.getElementById("page-jump-select");
 
+// DOM Ruleta
+const rouletteOverlay = document.getElementById("roulette-overlay");
+const rouletteCard = document.querySelector(".roulette-card");
+const rouletteBackdrop = document.getElementById("roulette-backdrop");
+const btnCloseRoulette = document.getElementById("btn-close-roulette");
+const rouletteCanvas = document.getElementById("roulette-canvas");
+const wheelPointer = document.getElementById("wheel-pointer");
+const btnSpinCenter = document.getElementById("btn-spin-center");
+const btnSpinMain = document.getElementById("btn-spin-main");
+const rouletteSpinBar = document.getElementById("roulette-spin-bar");
+const rouletteTimerPill = document.getElementById("roulette-timer-pill");
+const rouletteAttemptsPill = document.getElementById("roulette-attempts-pill");
+const rouletteSub = document.getElementById("roulette-sub");
+const rouletteResultBox = document.getElementById("roulette-result-box");
+const rouletteResultKicker = document.getElementById("roulette-result-kicker");
+const rouletteResultName = document.getElementById("roulette-result-name");
+const rouletteResultActions = document.getElementById("roulette-result-actions");
+const btnKeepPrize = document.getElementById("btn-keep-prize");
+const btnRetrySpin = document.getElementById("btn-retry-spin");
+const rouletteFab = document.getElementById("roulette-fab");
+const rouletteFabLabel = document.getElementById("roulette-fab-label");
+const previewToggleBar = document.getElementById("preview-toggle-bar");
+const btnTogglePreview = document.getElementById("btn-toggle-preview");
+const roulettePreviewControls = document.getElementById("roulette-preview-controls");
+const btnResetPreviewRoulette = document.getElementById("btn-reset-preview-roulette");
+const btnHidePreviewFromModal = document.getElementById("btn-hide-preview-from-modal");
+
 let toastTimer = null;
 let incognitoIndex = 0;
 let yaAnimadoEntrada = false;
@@ -251,6 +301,577 @@ function mostrarToast(texto) {
   toastTimer = setTimeout(() => {
     toastLock.classList.remove("is-visible");
   }, 3600);
+}
+
+/* =====================================================================
+   RULETA SORPRESA ARTESANAL (4:40 PM – 5:40 PM + PREVIEW)
+===================================================================== */
+
+if (rouletteCanvas) {
+  rouletteCanvas.width = 760;
+  rouletteCanvas.height = 760;
+}
+
+let previewActivaEnPantalla = PREVIEW_RULETA;
+let ruletaYaSpawneoAuto = false;
+let ruletaRotacion = 0.22;
+let ruletaGirando = false;
+let ruletaResultadoTemporal = null;
+let ruletaFaseLuz = 0;
+
+let estadoRuletaPreview = {
+  intentosUsados: 0,
+  premioElegido: null
+};
+
+function ruletaEstaEnVentanaReal() {
+  const ahora = new Date();
+  return ahora >= RULETA_INICIO && ahora < RULETA_FIN;
+}
+
+function ruletaDebeEstarActiva() {
+  return previewActivaEnPantalla || ruletaEstaEnVentanaReal();
+}
+
+function leerEstadoRuleta() {
+  if (previewActivaEnPantalla && !ruletaEstaEnVentanaReal()) {
+    return estadoRuletaPreview;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_RULETA);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        intentosUsados: Number(parsed.intentosUsados) || 0,
+        premioElegido: parsed.premioElegido || null
+      };
+    }
+  } catch {}
+  return { intentosUsados: 0, premioElegido: null };
+}
+
+function guardarEstadoRuleta(estado) {
+  if (previewActivaEnPantalla && !ruletaEstaEnVentanaReal()) {
+    estadoRuletaPreview = estado;
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY_RULETA, JSON.stringify(estado));
+  } catch {}
+}
+
+/* Selección ponderada: los 2 dorados son difíciles (~3.5% c/u) pero posibles */
+function elegirGajoConPeso() {
+  const totalPeso = RULETA_PREMIOS.reduce((acc, p) => acc + (p.peso || 10), 0);
+  let r = Math.random() * totalPeso;
+  for (let i = 0; i < RULETA_PREMIOS.length; i++) {
+    r -= RULETA_PREMIOS[i].peso || 10;
+    if (r <= 0) return i;
+  }
+  return RULETA_PREMIOS.length - 1;
+}
+
+/* Estrellita de 4 puntas dibujada en los gajos dorados */
+function dibujarEstrellita(ctx, x, y, r, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.beginPath();
+  ctx.moveTo(0, -r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.quadraticCurveTo(0, 0, 0, r);
+  ctx.quadraticCurveTo(0, 0, -r, 0);
+  ctx.quadraticCurveTo(0, 0, 0, -r);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
+
+/* Dibujo detallado de la ruleta con bisel de latón, sombreado y luces cálidas */
+function dibujarRuleta(angulo, faseLuz = 0) {
+  if (!rouletteCanvas) return;
+  const ctx = rouletteCanvas.getContext("2d");
+  const size = rouletteCanvas.width;
+  const cx = size / 2;
+  const cy = size / 2;
+  const outerRimR = size / 2 - 4;
+  const wheelR = outerRimR - 26;
+  const total = RULETA_PREMIOS.length;
+  const arc = (Math.PI * 2) / total;
+
+  // Paleta artesanal para los 6 gajos normales
+  const paletaNormal = [
+    { top: "#284336", bottom: "#182b22", texto: "#f8efdf" }, // verde pino
+    { top: "#faf2e2", bottom: "#eadcc4", texto: "#2d1910" }, // pergamino crema
+    { top: "#9a2d33", bottom: "#6e1b20", texto: "#fbf1e3" }, // lacre vino
+    { top: "#47281a", bottom: "#2b160d", texto: "#f7e8ce" }, // café oscuro
+    { top: "#536f5a", bottom: "#39503f", texto: "#f9f1e2" }, // salvia botánico
+    { top: "#bc726d", bottom: "#944f4a", texto: "#fdf5eb" }  // tulipán antiguo
+  ];
+  let idxPaleta = 0;
+
+  ctx.clearRect(0, 0, size, size);
+
+  /* --- CAPA 1: BISEL EXTERIOR FIJO DE MADERA OSCURA Y LATÓN --- */
+  const rimGrad = ctx.createRadialGradient(cx - 55, cy - 65, wheelR - 10, cx, cy, outerRimR);
+  rimGrad.addColorStop(0, "#5a3521");
+  rimGrad.addColorStop(0.65, "#2f190f");
+  rimGrad.addColorStop(1, "#1b0d07");
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerRimR, 0, Math.PI * 2);
+  ctx.fillStyle = rimGrad;
+  ctx.fill();
+
+  // Filete dorado exterior
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerRimR - 2, 0, Math.PI * 2);
+  ctx.strokeStyle = "#dfc077";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 24 lucecitas cálidas fijas en el marco exterior
+  const numLuces = 24;
+  const luzR = wheelR + 13;
+  for (let i = 0; i < numLuces; i++) {
+    const a = (i / numLuces) * Math.PI * 2 - Math.PI / 2;
+    const lx = cx + Math.cos(a) * luzR;
+    const ly = cy + Math.sin(a) * luzR;
+    const encendida = (i + faseLuz) % 2 === 0;
+
+    if (encendida) {
+      const glow = ctx.createRadialGradient(lx, ly, 1, lx, ly, 10);
+      glow.addColorStop(0, "rgba(255, 244, 198, 0.95)");
+      glow.addColorStop(0.45, "rgba(237, 195, 102, 0.48)");
+      glow.addColorStop(1, "rgba(237, 195, 102, 0)");
+      ctx.beginPath();
+      ctx.arc(lx, ly, 10, 0, Math.PI * 2);
+      ctx.fillStyle = glow;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(lx, ly, 4.1, 0, Math.PI * 2);
+    ctx.fillStyle = encendida ? "#fff5cf" : "#8b6935";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(43, 24, 16, 0.65)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  /* --- CAPA 2: DISCO GIRATORIO CON LOS 8 GAJOS --- */
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, wheelR, 0, Math.PI * 2);
+  ctx.clip();
+
+  for (let i = 0; i < total; i++) {
+    const premio = RULETA_PREMIOS[i];
+    const inicio = angulo + i * arc;
+    const fin = inicio + arc;
+    const mid = inicio + arc / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, wheelR, inicio, fin);
+    ctx.closePath();
+
+    let colorTexto = "#fbf4e6";
+
+    if (premio.dorado) {
+      // Lámina de oro artesanal con reflejo metálico
+      const gx = cx + Math.cos(mid) * wheelR;
+      const gy = cy + Math.sin(mid) * wheelR;
+      const grad = ctx.createLinearGradient(cx, cy, gx, gy);
+      grad.addColorStop(0, "#b88628");
+      grad.addColorStop(0.32, "#e8c469");
+      grad.addColorStop(0.58, "#fff0bd");
+      grad.addColorStop(0.82, "#d8a845");
+      grad.addColorStop(1, "#f7df94");
+      ctx.fillStyle = grad;
+      colorTexto = "#2b160a";
+    } else {
+      const p = paletaNormal[idxPaleta % paletaNormal.length];
+      idxPaleta++;
+      const gx = cx + Math.cos(mid) * wheelR;
+      const gy = cy + Math.sin(mid) * wheelR;
+      const grad = ctx.createLinearGradient(cx, cy, gx, gy);
+      grad.addColorStop(0, p.bottom);
+      grad.addColorStop(0.65, p.top);
+      grad.addColorStop(1, p.bottom);
+      ctx.fillStyle = grad;
+      colorTexto = p.texto;
+    }
+
+    ctx.fill();
+
+    // Brillos y marco fino dentro de los 2 gajos dorados
+    if (premio.dorado) {
+      ctx.save();
+      ctx.clip();
+
+      // Líneas suaves de reflejo metálico
+      ctx.strokeStyle = "rgba(255, 252, 234, 0.35)";
+      ctx.lineWidth = 2;
+      for (let rLine = 100; rLine < wheelR; rLine += 36) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, rLine, inicio + 0.04, fin - 0.04);
+        ctx.stroke();
+      }
+
+      // Arco ornamental cerca del borde exterior
+      ctx.beginPath();
+      ctx.arc(cx, cy, wheelR - 14, inicio + 0.05, fin - 0.05);
+      ctx.strokeStyle = "rgba(110, 69, 10, 0.45)";
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Pequeñas estrellitas en las puntas del gajo dorado
+      const sx = cx + Math.cos(mid) * (wheelR - 26);
+      const sy = cy + Math.sin(mid) * (wheelR - 26);
+      dibujarEstrellita(ctx, sx, sy, 8, "rgba(255, 252, 236, 0.92)");
+      ctx.restore();
+    } else {
+      // Filete interno sutil para acabado editorial
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, wheelR - 14, inicio + 0.05, fin - 0.05);
+      ctx.strokeStyle =
+        colorTexto === "#2d1910" ? "rgba(65, 36, 24, 0.16)" : "rgba(246, 224, 173, 0.22)";
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // División dorada entre gajos
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(inicio) * wheelR, cy + Math.sin(inicio) * wheelR);
+    ctx.strokeStyle = "rgba(235, 203, 132, 0.78)";
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+
+    // Texto elegante centrado radialmente
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = colorTexto;
+
+    if (premio.dorado) {
+      ctx.shadowColor = "rgba(255, 248, 218, 0.55)";
+      ctx.shadowBlur = 4;
+      ctx.font = '600 28px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText(premio.corto, wheelR - 42, 1);
+    } else {
+      ctx.shadowColor = "rgba(0, 0, 0, 0.16)";
+      ctx.shadowBlur = 2;
+      ctx.font = '500 27px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText(premio.corto, wheelR - 28, 1);
+    }
+    ctx.restore();
+  }
+
+  // Clavos metálicos (topes) en cada división del disco
+  for (let i = 0; i < total; i++) {
+    const a = angulo + i * arc;
+    const px = cx + Math.cos(a) * (wheelR - 10);
+    const py = cy + Math.sin(a) * (wheelR - 10);
+    const pegGrad = ctx.createRadialGradient(px - 2, py - 2, 1, px, py, 6);
+    pegGrad.addColorStop(0, "#fff8dc");
+    pegGrad.addColorStop(0.55, "#dfb55b");
+    pegGrad.addColorStop(1, "#7d5517");
+    ctx.beginPath();
+    ctx.arc(px, py, 5.4, 0, Math.PI * 2);
+    ctx.fillStyle = pegGrad;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(43, 24, 16, 0.55)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Sombra interior suave en el borde del disco y alrededor del sello central
+  const innerShadow = ctx.createRadialGradient(cx, cy, wheelR - 28, cx, cy, wheelR);
+  innerShadow.addColorStop(0, "rgba(0, 0, 0, 0)");
+  innerShadow.addColorStop(1, "rgba(20, 10, 5, 0.34)");
+  ctx.beginPath();
+  ctx.arc(cx, cy, wheelR, 0, Math.PI * 2);
+  ctx.fillStyle = innerShadow;
+  ctx.fill();
+
+  const hubShadow = ctx.createRadialGradient(cx, cy, 42, cx, cy, 94);
+  hubShadow.addColorStop(0, "rgba(20, 10, 5, 0.45)");
+  hubShadow.addColorStop(1, "rgba(20, 10, 5, 0)");
+  ctx.beginPath();
+  ctx.arc(cx, cy, 94, 0, Math.PI * 2);
+  ctx.fillStyle = hubShadow;
+  ctx.fill();
+
+  ctx.restore();
+
+  // Aro dorado pulido que separa el marco de madera del disco giratorio
+  ctx.beginPath();
+  ctx.arc(cx, cy, wheelR, 0, Math.PI * 2);
+  ctx.strokeStyle = "#e8c87a";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+}
+
+function lanzarDestellosPremio(esDorado) {
+  if (!rouletteCard) return;
+  const colores = esDorado
+    ? ["#fff4c4", "#e9c162", "#d19b32", "#f8e29b"]
+    : ["#e3be6d", "#c97b76", "#f5ebd8", "#a9864c"];
+  const cantidad = esDorado ? 26 : 12;
+
+  for (let i = 0; i < cantidad; i++) {
+    const sp = document.createElement("span");
+    sp.className = "roulette-spark";
+    const ang = (Math.PI * 2 * i) / cantidad + (Math.random() - 0.5) * 0.4;
+    const dist = (esDorado ? 115 : 75) + Math.random() * 85;
+    sp.style.setProperty("--dx", `${Math.cos(ang) * dist}px`);
+    sp.style.setProperty("--dy", `${Math.sin(ang) * dist}px`);
+    sp.style.setProperty("--dur", `${0.75 + Math.random() * 0.55}s`);
+    sp.style.background = colores[i % colores.length];
+    if (esDorado) {
+      sp.style.boxShadow = "0 0 8px rgba(240, 204, 112, 0.9)";
+    }
+    rouletteCard.appendChild(sp);
+    setTimeout(() => sp.remove(), 1400);
+  }
+}
+
+function indiceBajoAguja(angulo) {
+  const total = RULETA_PREMIOS.length;
+  const arc = (Math.PI * 2) / total;
+  const rel = (((1.5 * Math.PI - angulo) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  return Math.floor(rel / arc) % total;
+}
+
+function actualizarUIRuleta() {
+  const estado = leerEstadoRuleta();
+  const restantes = Math.max(0, RULETA_MAX_INTENTOS - estado.intentosUsados);
+
+  rouletteAttemptsPill.textContent =
+    estado.premioElegido
+      ? "Premio elegido"
+      : `${restantes} ${restantes === 1 ? "intento" : "intentos"}`;
+
+  if (estado.premioElegido) {
+    rouletteSub.innerHTML =
+      "Ya elegiste tu <strong>único premio</strong> de la ruleta. Tómale captura para reclamarlo.";
+    rouletteSpinBar.classList.add("hidden");
+    btnSpinCenter.disabled = true;
+    btnSpinCenter.querySelector("span").textContent = "LISTO";
+
+    rouletteResultBox.classList.remove("hidden");
+    rouletteResultBox.classList.add("is-claimed");
+    rouletteResultBox.classList.toggle("is-gold", Boolean(estado.premioElegido.dorado));
+    rouletteResultKicker.textContent = estado.premioElegido.dorado
+      ? "✦ TU PREMIO DORADO DEFINITIVO ✦"
+      : "TU ÚNICO PREMIO DEFINITIVO";
+    rouletteResultName.textContent = estado.premioElegido.completo;
+    rouletteResultActions.classList.add("hidden");
+    return;
+  }
+
+  rouletteResultBox.classList.remove("is-claimed");
+  rouletteSub.innerHTML =
+    "Tienes 10 intentos, pero solo te puedes quedar con <strong>un único premio</strong>.";
+
+  if (ruletaResultadoTemporal) {
+    rouletteSpinBar.classList.add("hidden");
+    btnSpinCenter.disabled = true;
+    btnSpinCenter.querySelector("span").textContent = "ELIGE";
+
+    rouletteResultBox.classList.remove("hidden");
+    rouletteResultBox.classList.toggle("is-gold", Boolean(ruletaResultadoTemporal.dorado));
+    rouletteResultKicker.textContent = ruletaResultadoTemporal.dorado
+      ? "✦ TE SALIÓ UN PREMIO DORADO ✦"
+      : "TE SALIÓ";
+    rouletteResultName.textContent = ruletaResultadoTemporal.completo;
+    rouletteResultActions.classList.remove("hidden");
+
+    btnRetrySpin.textContent = `Girar otra vez (${restantes})`;
+    btnRetrySpin.style.display = restantes > 0 ? "" : "none";
+    return;
+  }
+
+  rouletteResultBox.classList.add("hidden");
+  rouletteSpinBar.classList.remove("hidden");
+  btnSpinMain.disabled = ruletaGirando || restantes <= 0;
+  btnSpinCenter.disabled = ruletaGirando || restantes <= 0;
+  btnSpinCenter.querySelector("span").textContent = ruletaGirando ? "..." : "GIRAR";
+  btnSpinMain.textContent = ruletaGirando ? "Girando..." : "Girar la ruleta";
+}
+
+function girarRuleta() {
+  if (ruletaGirando) return;
+  const estado = leerEstadoRuleta();
+  const restantes = RULETA_MAX_INTENTOS - estado.intentosUsados;
+  if (estado.premioElegido || restantes <= 0) return;
+
+  ruletaGirando = true;
+  ruletaResultadoTemporal = null;
+
+  estado.intentosUsados += 1;
+  guardarEstadoRuleta(estado);
+  actualizarUIRuleta();
+
+  const total = RULETA_PREMIOS.length;
+  const arc = (Math.PI * 2) / total;
+
+  // Elegir gajo usando las probabilidades (dorados difíciles pero posibles)
+  const gajoDestino = elegirGajoConPeso();
+  const vueltas = 6 + Math.floor(Math.random() * 3); // 6 a 8 vueltas
+  const offsetDentroGajo = (0.18 + Math.random() * 0.64) * arc;
+
+  const anguloObjetivoMod =
+    (((1.5 * Math.PI - (gajoDestino * arc + offsetDentroGajo)) % (Math.PI * 2)) + Math.PI * 2) %
+    (Math.PI * 2);
+
+  const inicioRot = ruletaRotacion;
+  const actualMod = ((inicioRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  let deltaMod = anguloObjetivoMod - actualMod;
+  if (deltaMod <= 0) deltaMod += Math.PI * 2;
+
+  const destinoRot = inicioRot + vueltas * Math.PI * 2 + deltaMod;
+  const duracion = 5200; // Final lento y con suspenso
+  const tInicio = performance.now();
+  let ultimoGajo = indiceBajoAguja(inicioRot);
+  let tickTimer = null;
+
+  function animar(ahora) {
+    const progreso = Math.min(1, (ahora - tInicio) / duracion);
+    const eased = 1 - Math.pow(1 - progreso, 5);
+    ruletaRotacion = inicioRot + (destinoRot - inicioRot) * eased;
+
+    const gajoActual = indiceBajoAguja(ruletaRotacion);
+    if (gajoActual !== ultimoGajo) {
+      ultimoGajo = gajoActual;
+      ruletaFaseLuz = (ruletaFaseLuz + 1) % 2;
+      wheelPointer.classList.add("is-ticking");
+      clearTimeout(tickTimer);
+      tickTimer = setTimeout(() => wheelPointer.classList.remove("is-ticking"), 65);
+    }
+
+    dibujarRuleta(ruletaRotacion, ruletaFaseLuz);
+
+    if (progreso < 1) {
+      requestAnimationFrame(animar);
+      return;
+    }
+
+    ruletaGirando = false;
+    const ganador = RULETA_PREMIOS[indiceBajoAguja(ruletaRotacion)];
+    const estadoActual = leerEstadoRuleta();
+
+    lanzarDestellosPremio(Boolean(ganador.dorado));
+
+    if (estadoActual.intentosUsados >= RULETA_MAX_INTENTOS) {
+      estadoActual.premioElegido = ganador;
+      guardarEstadoRuleta(estadoActual);
+      ruletaResultadoTemporal = null;
+      mostrarToast("Último intento · Este quedó como tu premio definitivo.");
+    } else {
+      ruletaResultadoTemporal = ganador;
+    }
+
+    actualizarUIRuleta();
+  }
+
+  requestAnimationFrame(animar);
+}
+
+function abrirRuleta(conDestello = false) {
+  dibujarRuleta(ruletaRotacion, ruletaFaseLuz);
+  actualizarUIRuleta();
+
+  if (conDestello) {
+    radiantFlash.classList.remove("is-active");
+    void radiantFlash.offsetWidth;
+    radiantFlash.classList.add("is-active");
+    setTimeout(() => {
+      rouletteOverlay.classList.add("is-open");
+      rouletteOverlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }, 360);
+    setTimeout(() => radiantFlash.classList.remove("is-active"), 1480);
+  } else {
+    rouletteOverlay.classList.add("is-open");
+    rouletteOverlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  rouletteFab.classList.add("hidden");
+}
+
+function cerrarRuleta() {
+  if (ruletaGirando) return;
+  rouletteOverlay.classList.remove("is-open");
+  rouletteOverlay.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+
+  if (ruletaDebeEstarActiva()) {
+    rouletteFab.classList.remove("hidden");
+  }
+}
+
+function formatearMinSeg(ms) {
+  const totalSeg = Math.max(0, Math.floor(ms / 1000));
+  const mins = Math.floor(totalSeg / 60);
+  const segs = totalSeg % 60;
+  return `${pad2(mins)}:${pad2(segs)}`;
+}
+
+function revisarTiempoRuleta() {
+  const enVentanaReal = ruletaEstaEnVentanaReal();
+  const activa = previewActivaEnPantalla || enVentanaReal;
+
+  if (PREVIEW_RULETA) {
+    previewToggleBar.classList.remove("hidden");
+    btnTogglePreview.textContent = previewActivaEnPantalla
+      ? "Quitar preview ruleta"
+      : "Ver preview ruleta";
+    roulettePreviewControls.classList.toggle("hidden", !previewActivaEnPantalla);
+  } else {
+    previewToggleBar.classList.add("hidden");
+    roulettePreviewControls.classList.add("hidden");
+  }
+
+  if (!activa) {
+    rouletteFab.classList.add("hidden");
+    if (rouletteOverlay.classList.contains("is-open")) {
+      rouletteOverlay.classList.remove("is-open");
+      rouletteOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      mostrarToast("La ruleta acaba de desaparecer.");
+    }
+    return;
+  }
+
+  if (enVentanaReal) {
+    const restante = RULETA_FIN - new Date();
+    const mmss = formatearMinSeg(restante);
+    rouletteTimerPill.textContent = `Se va en ${mmss}`;
+    rouletteFabLabel.textContent = `Ruleta · ${mmss}`;
+  } else {
+    rouletteTimerPill.textContent = "Preview · 4:40–5:40 PM";
+    rouletteFabLabel.textContent = "Abrir ruleta (preview)";
+  }
+
+  // Pequeño pulso lento de las lucecitas del marco cuando está abierta y quieta
+  if (!ruletaGirando && rouletteOverlay.classList.contains("is-open")) {
+    ruletaFaseLuz = (ruletaFaseLuz + 1) % 2;
+    dibujarRuleta(ruletaRotacion, ruletaFaseLuz);
+  }
+
+  if (!ruletaYaSpawneoAuto) {
+    ruletaYaSpawneoAuto = true;
+    abrirRuleta(enVentanaReal);
+  } else if (!rouletteOverlay.classList.contains("is-open")) {
+    rouletteFab.classList.remove("hidden");
+  }
 }
 
 /* =====================================================================
@@ -437,7 +1058,6 @@ function formatearCuentaRegresivaExacta(ms) {
   return `${pad2(horas)}h ${pad2(mins)}m ${pad2(segs)}s`;
 }
 
-/* Inicializa la lámina dorada raspable */
 function inicializarCanvasRaspa(canvas, item, helperEl) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const stage = canvas.parentElement;
@@ -563,12 +1183,10 @@ function inicializarCanvasRaspa(canvas, item, helperEl) {
   canvas.addEventListener("pointercancel", terminarRaspa);
 }
 
-/* Construye el premio debajo de la lámina raspable */
 function construirContenidoRaspa(item, helperEl) {
   const underneath = document.createElement("div");
   underneath.className = "scratch-underneath";
 
-  // FORMATO 1: TICKET DE VALE (Día 1)
   if (item.formato === "ticket") {
     const ticket = document.createElement("div");
     ticket.className = "vale-ticket";
@@ -588,7 +1206,6 @@ function construirContenidoRaspa(item, helperEl) {
     return underneath;
   }
 
-  // FORMATO 2: 3 CUADROS MISTERIOSOS CON "?" (Día 2)
   if (item.formato === "cajas") {
     const estadoGlobal = obtenerEstadoCajas();
     if (!estadoGlobal[item.fecha] || !Array.isArray(estadoGlobal[item.fecha].orden)) {
@@ -661,7 +1278,6 @@ function construirContenidoRaspa(item, helperEl) {
     return underneath;
   }
 
-  // FORMATO 3: CARTA VIRTUAL (Día 3)
   if (item.formato === "carta_virtual") {
     const card = document.createElement("div");
     card.className = "virtual-letter-badge";
@@ -679,7 +1295,6 @@ function construirContenidoRaspa(item, helperEl) {
     return underneath;
   }
 
-  // FORMATO NORMAL (Días 4 al 28)
   const tieneContenido =
     (item.titulo && item.titulo.trim()) || (item.mensaje && item.mensaje.trim());
 
@@ -706,7 +1321,6 @@ function construirContenidoRaspa(item, helperEl) {
   return underneath;
 }
 
-/* Renderiza una página de Raspa y Gana (Páginas 5 a 32) */
 function renderPaginaRaspa(indiceRaspa) {
   const item = RASPA_Y_GANA[indiceRaspa];
   const numeroRaspa = indiceRaspa + 1;
@@ -781,7 +1395,6 @@ function renderPaginaRaspa(indiceRaspa) {
     return;
   }
 
-  // DESBLOQUEADO
   const stage = document.createElement("div");
   stage.className = "scratch-stage";
 
@@ -807,7 +1420,6 @@ function renderPaginaRaspa(indiceRaspa) {
   }
 }
 
-/* Renderiza cualquier página del libro (1 a 32) */
 function renderPaginaLibro(num) {
   limpiarTimersLibro();
   paginaActual = num;
@@ -1145,7 +1757,9 @@ function actualizarContador() {
   }
 }
 
-/* Eventos */
+/* =====================================================================
+   EVENTOS
+===================================================================== */
 btnEnter.addEventListener("click", () => {
   btnEnter.classList.add("is-breaking");
   setTimeout(() => {
@@ -1177,6 +1791,57 @@ pageJumpSelect.addEventListener("change", (e) => {
   irAPagina(Number(e.target.value));
 });
 
+// Eventos Ruleta
+btnSpinMain.addEventListener("click", girarRuleta);
+btnSpinCenter.addEventListener("click", girarRuleta);
+btnCloseRoulette.addEventListener("click", cerrarRuleta);
+rouletteBackdrop.addEventListener("click", cerrarRuleta);
+rouletteFab.addEventListener("click", () => abrirRuleta(false));
+
+btnKeepPrize.addEventListener("click", () => {
+  if (!ruletaResultadoTemporal) return;
+  const estado = leerEstadoRuleta();
+  estado.premioElegido = ruletaResultadoTemporal;
+  guardarEstadoRuleta(estado);
+  ruletaResultadoTemporal = null;
+  actualizarUIRuleta();
+  mostrarToast("Premio guardado · Ya es tuyo.");
+});
+
+btnRetrySpin.addEventListener("click", () => {
+  ruletaResultadoTemporal = null;
+  actualizarUIRuleta();
+  girarRuleta();
+});
+
+// Eventos Preview Ruleta
+function alternarPreviewRuleta() {
+  if (ruletaGirando) return;
+  previewActivaEnPantalla = !previewActivaEnPantalla;
+
+  if (previewActivaEnPantalla) {
+    abrirRuleta(false);
+  } else {
+    rouletteOverlay.classList.remove("is-open");
+    rouletteOverlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    rouletteFab.classList.add("hidden");
+  }
+  revisarTiempoRuleta();
+}
+
+btnTogglePreview.addEventListener("click", alternarPreviewRuleta);
+btnHidePreviewFromModal.addEventListener("click", () => {
+  if (previewActivaEnPantalla) alternarPreviewRuleta();
+});
+
+btnResetPreviewRoulette.addEventListener("click", () => {
+  if (ruletaGirando) return;
+  estadoRuletaPreview = { intentosUsados: 0, premioElegido: null };
+  ruletaResultadoTemporal = null;
+  actualizarUIRuleta();
+});
+
 incognitoWidget.addEventListener("click", () => {
   incognitoIndex = (incognitoIndex + 1) % INCOGNITO_MODOS.length;
   renderIncognito(true);
@@ -1187,6 +1852,7 @@ modalBackdrop.addEventListener("click", cerrarModal);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
+    if (rouletteOverlay.classList.contains("is-open")) cerrarRuleta();
     if (secretOverlay.classList.contains("is-open")) cerrarSecreto();
     if (letterModal.classList.contains("is-open")) cerrarModal();
   }
@@ -1197,4 +1863,12 @@ poblarIndiceLibro();
 renderIncognito(false);
 renderCalendario(false);
 actualizarContador();
-setInterval(actualizarContador, 1000);
+dibujarRuleta(ruletaRotacion, ruletaFaseLuz);
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => dibujarRuleta(ruletaRotacion, ruletaFaseLuz));
+}
+revisarTiempoRuleta();
+setInterval(() => {
+  actualizarContador();
+  revisarTiempoRuleta();
+}, 1000);

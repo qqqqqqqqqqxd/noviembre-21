@@ -12,7 +12,7 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
   <div class="paper-grain" aria-hidden="true"></div>
@@ -274,6 +274,77 @@
   </div>
 
   <!-- ==========================================
+       RULETA SORPRESA (SPAWNEA 4:40 PM – 5:40 PM HOY)
+  =========================================== -->
+  <div id="roulette-overlay" class="roulette-overlay" aria-hidden="true">
+    <div id="roulette-backdrop" class="roulette-backdrop"></div>
+
+    <div class="roulette-card" role="dialog" aria-modal="true" aria-labelledby="roulette-heading">
+      <button id="btn-close-roulette" class="close-roulette-btn" type="button" aria-label="Cerrar ruleta">
+        ✕
+      </button>
+
+      <div class="roulette-top-bar">
+        <span id="roulette-timer-pill" class="roulette-timer-pill">Se va en 59:59</span>
+        <span id="roulette-attempts-pill" class="roulette-attempts-pill">10 intentos</span>
+      </div>
+
+      <h3 id="roulette-heading" class="roulette-title">Apareció una ruleta...</h3>
+      <p id="roulette-sub" class="roulette-sub">
+        Tienes 10 intentos, pero solo te puedes quedar con <strong>un único premio</strong>.
+      </p>
+
+      <div class="wheel-shell">
+        <div id="wheel-pointer" class="wheel-pointer" aria-hidden="true"></div>
+        <div class="wheel-outer-rim">
+          <canvas id="roulette-canvas" class="roulette-canvas" width="640" height="640"></canvas>
+          <button id="btn-spin-center" class="wheel-center-seal" type="button" aria-label="Girar ruleta">
+            <span>GIRAR</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado temporal o premio definitivo -->
+      <div id="roulette-result-box" class="roulette-result-box hidden">
+        <span id="roulette-result-kicker" class="roulette-result-kicker">TE SALIÓ</span>
+        <p id="roulette-result-name" class="roulette-result-name"></p>
+        <div id="roulette-result-actions" class="roulette-result-actions">
+          <button id="btn-keep-prize" class="roulette-keep-btn" type="button">
+            Quedarme con este
+          </button>
+          <button id="btn-retry-spin" class="roulette-retry-btn" type="button">
+            Girar otra vez
+          </button>
+        </div>
+      </div>
+
+      <!-- Botón principal de giro -->
+      <div id="roulette-spin-bar" class="roulette-spin-bar">
+        <button id="btn-spin-main" class="roulette-spin-btn" type="button">
+          Girar la ruleta
+        </button>
+      </div>
+
+      <!-- Controles extra visibles solo en modo preview -->
+      <div id="roulette-preview-controls" class="roulette-preview-controls hidden">
+        <button id="btn-reset-preview-roulette" type="button">Reiniciar 10 intentos</button>
+        <button id="btn-hide-preview-from-modal" type="button">Quitar preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante para reabrir la ruleta mientras dure la hora (4:40–5:40 PM) -->
+  <button id="roulette-fab" class="roulette-fab hidden" type="button">
+    <span class="roulette-fab-dot" aria-hidden="true"></span>
+    <span id="roulette-fab-label">Ruleta · 59:59</span>
+  </button>
+
+  <!-- Barra discreta para prender/quitar la preview (solo aparece si PREVIEW_RULETA = true) -->
+  <div id="preview-toggle-bar" class="preview-toggle-bar hidden">
+    <button id="btn-toggle-preview" type="button">Quitar preview ruleta</button>
+  </div>
+
+  <!-- ==========================================
        CALENDARIO PRINCIPAL (DICIEMBRE)
   =========================================== -->
   <main id="main-app" class="main-app hidden">
@@ -387,6 +458,6 @@
     </article>
   </div>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
